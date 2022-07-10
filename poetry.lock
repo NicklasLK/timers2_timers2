@@ -194,7 +194,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "46e05dc8dbec624c8dac00ad485c056178d3462cd3d38ab05770406317146c32"
+content-hash = "ec43498459603e0cf214b7073742390f8c6c43fd7235e016b70b9d61389868d2"
 
 [metadata.files]
 boto3 = []

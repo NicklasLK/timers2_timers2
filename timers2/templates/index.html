@@ -1,5 +1,99 @@
 {% extends "base.html" %}
 
 {% block content %}
-hello
+    <table class="table" id="timersTable">
+        <thead>
+            <tr>
+                <th scope="col">System</th>
+                <th scope="col">Region</th>
+                <th scope="col">Structure</th>
+                <th scope="col">Owner</th>
+                <th scope="col">Timer type</th>
+                <th scope="col">Alliance</th>
+                <th scope="col">Corp</th>
+                <th scope="col">Date/time (EVE time)</th>
+                <th scope="col">Time left</th>
+                <th scope="col">Replace</th>
+                <th scope="col">Added by</th>
+                <th scope="col">Notes</th>
+                {% if user.permissions.delete_timer %}
+                    <th scope="col"></th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for timer in timers %}
+                <tr
+                    class="align-middle
+                    {% if timer.standing_type == "Friendly" %}
+                        table-success
+                    {% elif timer.standing_type == "Hostile" %}
+                        table-danger
+                    {% elif timer.standing_type == "It's complicated" %}
+                        table-warning
+                    {% else %}
+                        table-info
+                    {% endif %}
+                    ">
+                    <td>
+                        <a
+                            href="http://evemaps.dotlan.net/map/{{ timer.region_name }}/{{ timer.system_name }}"
+                            target="_blank">
+                            {{ timer.system_name }}
+                        </a>
+                    </td>
+                    <td>{{ timer.region_name }}</td>
+                    <td>{{ timer.structure_type }}</td>
+                    <td>{{ timer.standing_type }}</td>
+                    <td>{{ timer.timer_type }}</td>
+                    <td>{{ timer.alliance_ticker }}</td>
+                    <td>{{ timer.corporation_ticker }}</td>
+                    <td data-order="{{ timer.start_time.isoformat() }}">
+                        {{ timer.start_time.strftime("%b %d %y, %H:%S") }}
+                    </td>
+                    <td class="countdown"
+                        data-timestamp="{{ timer.start_time.timestamp() }}"
+                        data-order="{{ timer.start_time.isoformat() }}"></td>
+                    <td>{{ timer.replace }}</td>
+                    <td>{{ timer.added_by }}</td>
+                    <td>{{ timer.notes }}</td>
+                    {% if user.permissions.delete_timer %}
+                        <td>
+                            <button type="button" class="btn btn-danger btn-sm">
+                                Delete
+                            </button>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block scripts %}
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2.2.0/jquery.countdown.min.js"
+        integrity="sha512-lteuRD+aUENrZPTXWFRPTBcDDxIGWe5uu0apPEn+3ZKYDwDaEErIK9rvR0QzUGmUQ55KFE2RqGTVoZsKctGMVw=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer">
+    </script>
+    <script type="application/javascript">
+        $("#timersTable").DataTable({
+            paging: false,
+            order: [[7, "asc"]],
+            columnDefs: [
+                {targets: 11, orderable: false},
+                {targets: 12, orderable: false}
+            ]
+        });
+
+        $("#timersTable tbody .countdown").each(function() {
+            $(this).countdown(
+                +$(this).attr("data-timestamp") * 1000,
+                function(event) {
+                    console.log(event);
+                    $(this).html(event.strftime("%-D d %H:%M"));
+                });
+        });
+    </script>
 {% endblock %}
