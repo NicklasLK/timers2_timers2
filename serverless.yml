@@ -27,6 +27,7 @@ provider:
             - Fn::GetAtt: [ Timers2Table, Arn ]
   environment:
     TABLE_NAME: ${self:custom.tableName}
+    SECRET_KEY: ${ssm:/timers2/${self:provider.stage}/secret-key}
 
 functions:
   api:

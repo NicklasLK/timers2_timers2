@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <form method="POST">
+        {{ form.csrf_token }}
+        <div class="mb-3">
+            {{ form.start_time.label(class="form-label") }}
+            {{ form.start_time(class="form-control"
+                                     if not form.start_time.errors
+                                     else "form-control is-invalid",
+                               onchange="startTimeParse();") }}
+            <div class="form-text">
+                Format: 1d 2h 3m 4s or copy/paste from selected items window
+            </div>
+            {{ form.start_time|field_errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.system.label(class="form-label") }}
+            {{ form.system(class="form-control"
+                                 if not form.system.errors
+                                 else "form-control is-invalid") }}
+            {{ form.system|field_errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.corporation_ticker.label(class="form-label") }}
+            {{ form.corporation_ticker(class="form-control"
+                                             if not form.corporation_ticker.errors
+                                             else "form-control is-invalid") }}
+            {{ form.corporation_ticker|field_errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.alliance_ticker.label(class="form-label") }}
+            {{ form.alliance_ticker(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.standing_type.label(class="form-label") }}
+            {{ form.standing_type(class="form-control"
+                                        if not form.standing_type.errors
+                                        else "form-control is-invalid") }}
+            {{ form.standing_type|field_errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.structure_type.label(class="form-label") }}
+            {{ form.structure_type(class="form-control"
+                                         if not form.structure_type.errors
+                                         else "form-control is-invalid") }}
+            {{ form.structure_type|field_errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.timer_type.label(class="form-label") }}
+            {{ form.timer_type(class="form-control"
+                                     if not form.timer_type.errors
+                                     else "form-control is-invalid") }}
+            {{ form.timer_type|field_errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.replace.label(class="form-label") }}
+            {{ form.replace(class="form-control"
+                                  if not form.replace.errors
+                                  else "form-control is-invalid") }}
+            {{ form.replace|field_errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.notes.label(class="form-label") }}
+            {{ form.notes(class="form-control") }}
+        </div>
+
+        <input type="submit" class="btn btn-primary" value="Save"/>
+    </form>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        function startTimeParse() {
+            let startTimeText = $("#start_time").val();
+            let systemNameField = $("#system");
+            let notesField = $("#notes");
+            if (startTimeText.length == 0) {
+                return;
+            }
+
+            if (startTimeText.includes("Reinforced until ")) {
+                let systemName = /(^.*?) - /.exec(startTimeText)[1];
+                if (systemNameField.val().length == 0) {
+                    systemNameField.val(systemName);
+                }
+
+                let structureName = /^.*? - (.*?)<br>/.exec(startTimeText)[1];
+                if (notesField.val().length == 0) {
+                    notesField.val(structureName);
+                }
+            }
+        }
+    </script>
+{% endblock %}

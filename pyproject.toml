@@ -12,6 +12,9 @@ boto3 = "^1.24.26"
 Werkzeug = "^2.1.2"
 python-dateutil = "^2.8.2"
 httpx = "^0.23.0"
+WTForms = "^3.0.1"
+Flask-WTF = "^1.0.1"
+MarkupSafe = "^2.1.1"
 
 [tool.poetry.dev-dependencies]
 
