@@ -15,6 +15,7 @@ httpx = "^0.23.0"
 WTForms = "^3.0.1"
 Flask-WTF = "^1.0.1"
 MarkupSafe = "^2.1.1"
+Flask-pyoidc = "^3.11.0"
 
 [tool.poetry.dev-dependencies]
 

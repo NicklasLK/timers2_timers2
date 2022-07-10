@@ -28,6 +28,9 @@ provider:
   environment:
     TABLE_NAME: ${self:custom.tableName}
     SECRET_KEY: ${ssm:/timers2/${self:provider.stage}/secret-key}
+    BASE_URL: { "Fn::Join" : ["", ["https://", { "Ref" : "ApiGatewayRestApi" }, ".execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}" ] ] }
+    OIDC_CLIENT_ID: ${ssm:/timers2/${self:provider.stage}/oidc-client-id}
+    OIDC_CLIENT_SECRET: ${ssm:/timers2/${self:provider.stage}/oidc-client-secret}
 
 functions:
   api:

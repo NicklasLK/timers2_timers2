@@ -1,21 +1,67 @@
 import os
 
 import boto3
-from flask import Flask, render_template, redirect, url_for, abort
+from flask import Flask, render_template, redirect, url_for, abort, session, request
 from flask_wtf.csrf import CSRFProtect
+from flask_pyoidc import OIDCAuthentication
+from flask_pyoidc.provider_configuration import ClientMetadata, ProviderConfiguration
+from flask_pyoidc.redirect_uri_config import RedirectUriConfig
+from flask_pyoidc.user_session import UserSession
 from markupsafe import Markup
 
 from .forms import TimerForm
 from .utils import get_timers, put_timer
 
 
+PERMISSION_ROLES = {
+    "urn:sso:alliance:test-alliance": ["view_timers", "add_timer"],
+    "urn:sso:allies": ["view_timers", "add_timer"],
+    "urn:sso:leadership:high-command": ["delete_timer"],
+}
+
+
 app = Flask(__name__)
-app.secret_key = os.environ["SECRET_KEY"]
+app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 csrf = CSRFProtect(app)
+auth = OIDCAuthentication(
+    {
+        "default": ProviderConfiguration(
+            issuer="https://sso.pleaseignore.com/auth/realms/auth-ng",
+            client_metadata=ClientMetadata(
+                client_id=os.environ["OIDC_CLIENT_ID"],
+                client_secret=os.environ["OIDC_CLIENT_SECRET"],
+                post_logout_redirect_uris=[os.environ["BASE_URL"]],
+            ),
+            auth_request_params={"scope": ["openid"] + list(PERMISSION_ROLES.keys())},
+        )
+    },
+    app,
+    RedirectUriConfig(os.environ["BASE_URL"] + "/callback", "callback"),
+)
 
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(os.environ["TABLE_NAME"])
+
+
+@app.before_request
+def request_started():
+    user_session = UserSession(session, provider_name="default")
+    if not user_session.is_authenticated():
+        request.primary_character_name = None
+        request.permissions = {}
+
+        return
+
+    user_roles = user_session.id_token["realm_access"]["roles"]
+
+    request.primary_character_name = user_session.id_token["character"]
+    request.permissions = {
+        permission: True
+        for role, permissions in PERMISSION_ROLES.items()
+        for permission in permissions
+        if role in user_roles
+    }
 
 
 @app.template_filter()
@@ -27,17 +73,21 @@ def field_errors(field):
 
 
 @app.route("/")
+@auth.oidc_auth("default")
 def index():
+    if not request.permissions.get("view_timers"):
+        return abort(403)
+
     timers = get_timers(table)
 
-    return render_template(
-        "index.html", user={"permissions": {"delete_timer": True}}, timers=timers
-    )
+    return render_template("index.html", timers=timers)
 
 
 @app.route("/add-timer", methods=["GET", "POST"])
+@auth.oidc_auth("default")
 def add_timer():
-    user = {"primary_character_name": "Tross Yvormes"}
+    if not request.permissions.get("add_timer"):
+        return abort(403)
 
     form = TimerForm()
     if form.validate_on_submit():
@@ -55,7 +105,7 @@ def add_timer():
             timer_type=form.data["timer_type"],
             replace=form.data["replace"],
             notes=form.data["notes"],
-            added_by=user["primary_character_name"],
+            added_by=request.primary_character_name,
         )
 
         return redirect(url_for("index"))
@@ -64,10 +114,9 @@ def add_timer():
 
 
 @app.route("/delete-timer/<id>", methods=["POST"])
+@auth.oidc_auth("default")
 def delete_timer(id):
-    user = {"permissions": {"delete_timer": True}}
-
-    if not user["permissions"]["delete_timer"]:
+    if not request.permissions.get("delete_timer"):
         return abort(403)
 
     table.delete_item(Key={"PK": "TIMER", "SK": id})

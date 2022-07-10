@@ -16,7 +16,7 @@
                 <th scope="col">Replace</th>
                 <th scope="col">Added by</th>
                 <th scope="col">Notes</th>
-                {% if user.permissions.delete_timer %}
+                {% if request.permissions.delete_timer %}
                     <th scope="col"></th>
                 {% endif %}
             </tr>
@@ -57,7 +57,7 @@
                     <td>{{ timer.replace }}</td>
                     <td>{{ timer.added_by }}</td>
                     <td>{{ timer.notes }}</td>
-                    {% if user.permissions.delete_timer %}
+                    {% if request.permissions.delete_timer %}
                         <td>
                             <form method="POST"
                                   action="{{ url_for("delete_timer", id=timer.SK) }}">
