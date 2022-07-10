@@ -37,7 +37,7 @@
                     ">
                     <td>
                         <a
-                            href="http://evemaps.dotlan.net/map/{{ timer.region_name }}/{{ timer.system_name }}"
+                            href="http://evemaps.dotlan.net/map/{{ timer.region_name.replace(" ", "_") }}/{{ timer.system_name }}"
                             target="_blank">
                             {{ timer.system_name }}
                         </a>
