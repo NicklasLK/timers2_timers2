@@ -1,7 +1,8 @@
 import os
 
 import boto3
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, abort
+from flask_wtf.csrf import CSRFProtect
 from markupsafe import Markup
 
 from .forms import TimerForm
@@ -10,6 +11,7 @@ from .utils import get_timers, put_timer
 
 app = Flask(__name__)
 app.secret_key = os.environ["SECRET_KEY"]
+csrf = CSRFProtect(app)
 
 
 dynamodb = boto3.resource("dynamodb")
@@ -59,6 +61,18 @@ def add_timer():
         return redirect(url_for("index"))
 
     return render_template("add_timer.html", form=form)
+
+
+@app.route("/delete-timer/<id>", methods=["POST"])
+def delete_timer(id):
+    user = {"permissions": {"delete_timer": True}}
+
+    if not user["permissions"]["delete_timer"]:
+        return abort(403)
+
+    table.delete_item(Key={"PK": "TIMER", "SK": id})
+
+    return redirect(url_for("index"))
 
 
 @app.errorhandler(404)
