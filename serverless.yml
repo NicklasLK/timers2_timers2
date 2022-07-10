@@ -38,6 +38,10 @@ functions:
       - http:
           path: /{proxy+}
           method: ANY
+  import-esi:
+    handler: timers2.import_esi.handler
+    events:
+      - schedule: rate(5 minutes)
 
 plugins:
   - serverless-wsgi
