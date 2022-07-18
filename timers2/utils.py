@@ -52,6 +52,12 @@ def put_timer(
     added_by,
     esi_campaign_id=None
 ):
+
+    if start_time.tzinfo is None or not start_time.tzinfo.utcoffset(start_time):
+        start_time = start_time.replace(tzinfo=timezone.utc)
+    else:
+        start_time = start_time.astimezone(timezone.utc)
+
     item = {
         "PK": "TIMER",
         "SK": "TIMER#{}#{}".format(

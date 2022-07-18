@@ -80,9 +80,7 @@ def handler(event, context):
                 continue
 
             start_time = isoparse(item["start_time"])
-            if not (
-                start_time.tzinfo is None and start_time.tzinfo.utcoffset(start_time)
-            ):
+            if start_time.tzinfo is None or not start_time.tzinfo.utcoffset(start_time):
                 start_time = start_time.replace(tzinfo=timezone.utc)
             else:
                 start_time = start_time.astimezone(timezone.utc)
