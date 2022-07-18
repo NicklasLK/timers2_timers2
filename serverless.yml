@@ -25,6 +25,11 @@ provider:
             - dynamodb:DeleteItem
           Resource:
             - Fn::GetAtt: [ Timers2Table, Arn ]
+            - Fn::Join:
+                - "/"
+                -
+                  - Fn::GetAtt: [ Timers2Table, Arn ]
+                  - "index/*"
   environment:
     TABLE_NAME: ${self:custom.tableName}
     SECRET_KEY: ${ssm:/timers2/${opt:stage}/secret-key}
