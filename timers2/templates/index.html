@@ -49,7 +49,7 @@
                     <td>{{ timer.alliance_ticker }}</td>
                     <td>{{ timer.corporation_ticker }}</td>
                     <td data-order="{{ timer.start_time.isoformat() }}">
-                        {{ timer.start_time.strftime("%b %d %y, %H:%S") }}
+                        {{ timer.start_time.strftime("%b %d %y, %H:%M") }}
                     </td>
                     <td class="countdown"
                         data-timestamp="{{ timer.start_time.timestamp() }}"
