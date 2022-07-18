@@ -89,7 +89,9 @@
             order: [[7, "asc"]],
             columnDefs: [
                 {targets: 11, orderable: false},
-                {targets: 12, orderable: false}
+                {% if request.permissions.delete_timer %}
+                    {targets: 12, orderable: false}
+                {% endif %}
             ]
         });
 
