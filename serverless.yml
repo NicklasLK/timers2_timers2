@@ -27,7 +27,11 @@ provider:
   environment:
     TABLE_NAME: ${self:custom.tableName}
     SECRET_KEY: ${ssm:/timers2/${opt:stage}/secret-key}
-    BASE_URL: { "Fn::Join" : ["", ["https://", { "Ref" : "ApiGatewayRestApi" }, ".execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}" ] ] }
+    BASE_URL:
+      Fn::If:
+        - IsProd
+        - 'https://timers2.pleaseignore.com'
+        - { "Fn::Join" : ["", ["https://", { "Ref" : "ApiGatewayRestApi" }, ".execute-api.${self:provider.region}.amazonaws.com/${opt:stage}" ] ] }
     OIDC_CLIENT_ID: ${ssm:/timers2/${opt:stage}/oidc-client-id}
     OIDC_CLIENT_SECRET: ${ssm:/timers2/${opt:stage}/oidc-client-secret}
 
@@ -87,3 +91,9 @@ resources:
         TimeToLiveSpecification:
           AttributeName: TTL
           Enabled: true
+
+  Conditions:
+    IsProd:
+      Fn::Equals:
+        - ${opt:stage}
+        - prod
