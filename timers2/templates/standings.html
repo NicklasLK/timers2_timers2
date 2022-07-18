@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="d-flex flex-row-reverse mb-2">
+        <a class="btn btn-primary"
+           href="{{ url_for("add_standing") }}"
+           role="button">
+            Add standing
+        </a>
+    </div>
+
+    <table class="table" id="standingsTable">
+        <thead>
+            <tr>
+                <th scope="col">Alliance ticker</th>
+                <th scope="col">Standing type</th>
+                <th scope="col">Notes</th>
+                {% if request.permissions.delete_standing %}
+                    <th scope="col"></th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for standing in standings %}
+                <tr
+                    class="align-middle
+                    {% if standing.standing_type == "Friendly" %}
+                        table-success
+                    {% elif standing.standing_type == "Hostile" %}
+                        table-danger
+                    {% elif standing.standing_type == "It's complicated" %}
+                        table-warning
+                    {% else %}
+                        table-info
+                    {% endif %}
+                    ">
+                    <td>{{ standing.ticker }}</td>
+                    <td>{{ standing.standing_type }}</td>
+                    <td>{{ standing.notes }}</td>
+                    {% if request.permissions.delete_standing %}
+                        <td>
+                            <form method="POST"
+                                  action="{{ url_for("delete_standing", id=standing.SK) }}">
+                                <input type="hidden"
+                                       name="csrf_token"
+                                       value="{{ csrf_token() }}"/>
+                                <input type="submit"
+                                       class="btn btn-danger btn-sm"
+                                       value="Delete" />
+                            </form>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block scripts %}
+    <script type="application/javascript">
+        $("#standingsTable").DataTable({
+            paging: false,
+        });
+    </script>
+{% endblock %}

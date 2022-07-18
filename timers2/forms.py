@@ -131,3 +131,13 @@ class TimerForm(FlaskForm):
         validators=[validators.InputRequired()],
     )
     notes = TextAreaField("Notes")
+
+
+class StandingForm(FlaskForm):
+    ticker = StringField("Corporation ticker", validators=[validators.InputRequired()])
+    standing_type = SelectField(
+        "Standing",
+        choices=["Friendly", "Hostile", "It's complicated", "Unknown"],
+        validators=[validators.InputRequired()],
+    )
+    notes = TextAreaField("Notes")

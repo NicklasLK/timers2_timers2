@@ -106,3 +106,25 @@ def get_timers(table, only_active=True):
             break
 
     return timers
+
+
+def get_standings(table):
+    standings = []
+
+    exclusive_start_key = None
+    while True:
+        kwargs = {"KeyConditionExpression": Key("PK").eq("STANDING")}
+        if exclusive_start_key:
+            kwargs["ExclusiveStartKey"] = exclusive_start_key
+
+        response = table.query(**kwargs)
+
+        for standing in response["Items"]:
+            standing["ticker"] = standing["SK"][9:]
+            standings.append(standing)
+
+        exclusive_start_key = response.get("LastEvaluatedKey")
+        if not exclusive_start_key:
+            break
+
+    return standings

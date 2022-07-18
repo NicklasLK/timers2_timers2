@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <form method="POST">
+        {{ form.csrf_token }}
+        <div class="mb-3">
+            {{ form.ticker.label(class="form-label") }}
+            {{ form.ticker(class="form-control"
+                                  if not form.ticker.errors
+                                  else "form-control is-invalid") }}
+            {{ form.ticker|field_errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.standing_type.label(class="form-label") }}
+            {{ form.standing_type(class="form-control"
+                                         if not form.standing_type.errors
+                                          else "form-control is-invalid") }}
+            {{ form.standing_type|field_errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.notes.label(class="form-label") }}
+            {{ form.notes(class="form-control") }}
+        </div>
+
+        <input type="submit" class="btn btn-primary" value="Save"/>
+    </form>
+{% endblock %}

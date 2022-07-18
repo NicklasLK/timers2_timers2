@@ -9,8 +9,8 @@ from flask_pyoidc.redirect_uri_config import RedirectUriConfig
 from flask_pyoidc.user_session import UserSession
 from markupsafe import Markup
 
-from .forms import TimerForm
-from .utils import get_timers, put_timer
+from .forms import TimerForm, StandingForm
+from .utils import get_timers, put_timer, get_standings
 
 
 PERMISSION_ROLES = {
@@ -18,11 +18,13 @@ PERMISSION_ROLES = {
     "urn:sso:allies": ["view_timers", "add_timer"],
     "urn:sso:leadership:high-command": [
         "delete_timer",
+        "view_standings",
         "add_standing",
         "delete_standing",
     ],
     "urn:sso:diplomatic:alliance-diplomats": [
         "delete_timer",
+        "view_standings",
         "add_standing",
         "delete_standing",
     ],
@@ -133,6 +135,48 @@ def delete_timer(id):
     table.delete_item(Key={"PK": "TIMER", "SK": id})
 
     return redirect(url_for("index"))
+
+
+@app.route("/standings")
+@auth.oidc_auth("default")
+def standings():
+    if not request.permissions.get("view_standings"):
+        return abort(403)
+
+    return render_template("standings.html", standings=get_standings(table))
+
+
+@app.route("/add-standing", methods=["GET", "POST"])
+@auth.oidc_auth("default")
+def add_standing():
+    if not request.permissions.get("add_standing"):
+        return abort(403)
+
+    form = StandingForm()
+    if form.validate_on_submit():
+        table.put_item(
+            Item={
+                "PK": "STANDING",
+                "SK": "ALLIANCE#{}".format(form.data["ticker"]),
+                "standing_type": form.data["standing_type"],
+                "notes": form.data["notes"],
+            }
+        )
+
+        return redirect(url_for("standings"))
+
+    return render_template("add_standing.html", form=form)
+
+
+@app.route("/delete-standing/<id>", methods=["POST"])
+@auth.oidc_auth("default")
+def delete_standing(id):
+    if not request.permissions.get("delete_standing"):
+        return abort(403)
+
+    table.delete_item(Key={"PK": "STANDING", "SK": id})
+
+    return redirect(url_for("standings"))
 
 
 @app.errorhandler(404)
