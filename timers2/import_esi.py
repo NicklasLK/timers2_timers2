@@ -1,5 +1,6 @@
 import os
 import json
+import traceback
 from datetime import timezone
 
 import boto3
@@ -63,7 +64,8 @@ def handler(event, context):
                     alliance_response.raise_for_status()
                     alliance_ticker = alliance_response.json().get("ticker")
                     alliance_tickers[item["defender_id"]] = alliance_ticker
-                except (ValueError, httpx.HTTPStatusError, json.JSONDecodeError):
+                except (ValueError, httpx.HTTPStatusError, json.JSONDecodeError) as e:
+                    traceback.print_exc()
                     continue
 
             if alliance_ticker not in alliances:
@@ -73,7 +75,8 @@ def handler(event, context):
                 system_name, region_name = get_system_names(
                     table, item["solar_system_id"]
                 )
-            except (ValueError, ClientError):
+            except (ValueError, ClientError) as e:
+                traceback.print_exc()
                 continue
 
             if not alliance_ticker:
