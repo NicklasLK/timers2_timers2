@@ -16,7 +16,18 @@ from .utils import get_timers, put_timer
 PERMISSION_ROLES = {
     "urn:sso:alliance:test-alliance": ["view_timers", "add_timer"],
     "urn:sso:allies": ["view_timers", "add_timer"],
-    "urn:sso:leadership:high-command": ["delete_timer"],
+    "urn:sso:leadership:high-command": [
+        "delete_timer",
+        "add_standing",
+        "delete_standing",
+    ],
+    "urn:sso:diplomatic:alliance-diplomats": [
+        "delete_timer",
+        "add_standing",
+        "delete_standing",
+    ],
+    "urn:sso:military:fc:skirmish": ["delete_timer"],
+    "urn:sso:leadership:test-command": ["delete_timer"],
 }
 
 
