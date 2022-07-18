@@ -6,34 +6,30 @@ from dateutil.parser import isoparse
 from boto3.dynamodb.conditions import Key, Attr
 
 
-def get_system_names(client, system_id):
-    system_response = client.get(
-        "https://esi.evetech.net/v4/universe/systems/{}".format(system_id)
+def get_system_region_name(table, system_name):
+    response = table.query(
+        KeyConditionExpression=Key("PK").eq("SYSTEM")
+        & Key("SK").eq("SYSTEM#{}".format(system_name)),
     )
-    system_response.raise_for_status()
-    system_json = system_response.json()
-    system_name = system_json.get("name")
-    constellation_id = system_json.get("constellation_id")
-    if not system_name or not constellation_id:
+    if not len(response.get("Items", [])) == 1:
         raise ValueError()
 
-    constellation_response = client.get(
-        "https://esi.evetech.net/v1/universe/constellations/{}".format(constellation_id)
+    item = response["Items"][0]
+
+    return item["region_name"]
+
+
+def get_system_names(table, system_id):
+    response = table.query(
+        IndexName="GSI1",
+        KeyConditionExpression=Key("GSI1PK").eq("SYSTEM#{}".format(system_id)),
     )
-    constellation_response.raise_for_status()
-    region_id = constellation_response.json().get("region_id")
-    if not region_id:
+    if not len(response.get("Items", [])) == 1:
         raise ValueError()
 
-    region_response = client.get(
-        "https://esi.evetech.net/v1/universe/regions/{}".format(region_id)
-    )
-    region_response.raise_for_status()
-    region_name = region_response.json().get("name")
-    if not region_name:
-        raise ValueError()
+    item = response["Items"][0]
 
-    return system_name, region_name
+    return item["SK"][7:], item["region_name"]
 
 
 def get_timer_suffix():

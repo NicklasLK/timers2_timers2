@@ -6,6 +6,7 @@ import boto3
 import httpx
 from dateutil.parser import isoparse
 from boto3.dynamodb.conditions import Key
+from botocore.exceptions import ClientError
 
 from timers2.utils import get_timers, get_system_names, put_timer
 
@@ -70,9 +71,9 @@ def handler(event, context):
 
             try:
                 system_name, region_name = get_system_names(
-                    client, item["solar_system_id"]
+                    table, item["solar_system_id"]
                 )
-            except (ValueError, httpx.HTTPStatusError, json.JSONDecodeError):
+            except (ValueError, ClientError):
                 continue
 
             if not alliance_ticker:

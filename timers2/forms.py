@@ -1,11 +1,16 @@
+import os
 import re
 from datetime import datetime, timezone, timedelta
 
-import httpx
+import boto3
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, TextAreaField, validators
 
-from .utils import get_system_names
+from .utils import get_system_region_name
+
+
+dynamodb = boto3.resource("dynamodb")
+table = dynamodb.Table(os.environ["TABLE_NAME"])
 
 
 class DatetimeField(StringField):
@@ -52,26 +57,10 @@ class SystemField(StringField):
     def process_formdata(self, valuelist):
         super().process_formdata(valuelist)
 
-        with httpx.Client() as client:
-            search_response = client.get(
-                "https://esi.evetech.net/v2/search/",
-                params={
-                    "search": self.data,
-                    "categories": "solar_system",
-                    "strict": "true",
-                },
-            )
-            search_response.raise_for_status()
-
-            search_data = search_response.json()
-            system_id = search_data and search_data.get("solar_system")
-            if system_id:
-                system_id = system_id[0]
-
-            if not system_id:
-                self.data = None
-
-            self.data = get_system_names(client, system_id)
+        try:
+            self.data = (self.data, get_system_region_name(table, self.data))
+        except ValueError:
+            self.data = None
 
     def _value(self):
         return (
