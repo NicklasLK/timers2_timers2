@@ -88,10 +88,7 @@ def get_timers(table, only_active=True):
 
     exclusive_start_key = None
     while True:
-        kwargs = {
-            "KeyConditionExpression": Key("PK").eq("TIMER"),
-            "Limit": 50,
-        }
+        kwargs = {"KeyConditionExpression": Key("PK").eq("TIMER")}
         if exclusive_start_key:
             kwargs["ExclusiveStartKey"] = exclusive_start_key
 
