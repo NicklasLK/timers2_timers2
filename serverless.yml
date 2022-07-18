@@ -43,10 +43,12 @@ functions:
           method: ANY
   import-esi:
     handler: timers2.import_esi.handler
+    timeout: 900
     events:
       - schedule: rate(5 minutes)
   import-systems:
     handler: timers2.import_systems.handler
+    timeout: 900
     events:
       - schedule: rate(1 day)
 
