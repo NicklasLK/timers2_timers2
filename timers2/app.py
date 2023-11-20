@@ -29,6 +29,7 @@ PERMISSION_ROLES = {
         "delete_standing",
     ],
     "urn:sso:military:fc:skirmish": ["delete_timer"],
+    "urn:sso:military:military-coordinator": ["delete_timer"],
     "urn:sso:leadership:test-command": ["delete_timer"],
 }
 
