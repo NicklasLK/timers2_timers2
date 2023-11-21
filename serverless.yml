@@ -6,6 +6,8 @@ custom:
   tableName: 'timers2-${opt:stage}'
   wsgi:
     app: timers2.app.app
+  pythonRequirements:
+    dockerizePip: true
 
 provider:
   name: aws
