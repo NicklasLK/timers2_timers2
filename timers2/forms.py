@@ -1,13 +1,12 @@
 import os
 import re
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
 import boto3
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, TextAreaField, validators
+from wtforms import SelectField, StringField, TextAreaField, validators
 
-from .utils import get_system_region_name
-
+from .utils import STRUCTURE_TYPES, get_system_region_name
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(os.environ["TABLE_NAME"])
@@ -90,22 +89,7 @@ class TimerForm(FlaskForm):
     )
     structure_type = SelectField(
         "Structure type",
-        choices=[
-            "I-hub",
-            "PoCo",
-            "Tower",
-            "TCU",
-            "Other/Unknown",
-            "Athanor",
-            "Astrahaus",
-            "Raitaru",
-            "Azbel",
-            "Fortizar",
-            "Tatara",
-            "Sotiyo",
-            "Keepstar",
-            "Ansiblex",
-        ],
+        choices=STRUCTURE_TYPES.items(),
         validators=[validators.InputRequired()],
     )
     timer_type = SelectField(

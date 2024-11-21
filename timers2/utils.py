@@ -1,9 +1,27 @@
 import random
 import string
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
+from boto3.dynamodb.conditions import Attr, Key
 from dateutil.parser import isoparse
-from boto3.dynamodb.conditions import Key, Attr
+
+STRUCTURE_TYPES = {
+    "I_HUB": "I-hub",
+    "POCO": "PoCo",
+    "TOWER": "Tower",
+    "TCU": "TCU",
+    "OTHER_UNKNOWN": "Other/Unknown",
+    "ATHANOR": "Athanor",
+    "ASTRAHAUS": "Astrahaus",
+    "RAITARU": "Raitaru",
+    "AZBEL": "Azbel",
+    "FORTIZAR": "Fortizar",
+    "TATARA": "Tatara",
+    "SOTIYO": "Sotiyo",
+    "KEEPSTAR": "Keepstar",
+    "ANSIBLEX": "Ansiblex",
+    "ORBITAL_SKYHOOK": "Orbital Skyhook",
+}
 
 
 def get_system_region_name(table, system_name):
@@ -83,7 +101,11 @@ def put_timer(
     table.put_item(Item=item, ConditionExpression=Attr("PK").not_exists())
 
 
-def get_timers(table, only_active=True):
+def is_timer_secret(timer):
+    return timer["structure_type"] == "ORBITAL_SKYHOOK"
+
+
+def get_timers(table, *, only_active=True, include_secret=False):
     timers = []
 
     now = datetime.now(tz=timezone.utc)
@@ -104,6 +126,11 @@ def get_timers(table, only_active=True):
             timer["start_time"] = isoparse(sk_parts[1])
             if only_active and timer["start_time"] < now - timedelta(hours=1):
                 continue
+
+            if not include_secret and is_timer_secret(timer):
+                continue
+
+            timer["structure_type_name"] = STRUCTURE_TYPES[timer["structure_type"]]
 
             timers.append(timer)
 

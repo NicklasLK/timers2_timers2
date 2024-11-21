@@ -1,17 +1,16 @@
 import os
 
 import boto3
-from flask import Flask, render_template, redirect, url_for, abort, session, request
-from flask_wtf.csrf import CSRFProtect
+from flask import Flask, abort, redirect, render_template, request, session, url_for
 from flask_pyoidc import OIDCAuthentication
 from flask_pyoidc.provider_configuration import ClientMetadata, ProviderConfiguration
 from flask_pyoidc.redirect_uri_config import RedirectUriConfig
 from flask_pyoidc.user_session import UserSession
+from flask_wtf.csrf import CSRFProtect
 from markupsafe import Markup
 
-from .forms import TimerForm, StandingForm
-from .utils import get_timers, put_timer, get_standings
-
+from .forms import StandingForm, TimerForm
+from .utils import get_standings, get_timers, put_timer
 
 PERMISSION_ROLES = {
     "urn:sso:alliance:test-alliance": ["view_timers", "add_timer"],
@@ -21,6 +20,7 @@ PERMISSION_ROLES = {
         "view_standings",
         "add_standing",
         "delete_standing",
+        "view_secret_timers",
     ],
     "urn:sso:diplomatic:alliance-diplomats": [
         "delete_timer",
@@ -31,6 +31,7 @@ PERMISSION_ROLES = {
     "urn:sso:military:fc:skirmish": ["delete_timer"],
     "urn:sso:military:military-coordinator": ["delete_timer"],
     "urn:sso:leadership:test-command": ["delete_timer"],
+    "urn:sso:logistics:alliance-logistics": ["view_secret_timers"],
 }
 
 
@@ -92,7 +93,9 @@ def index():
     if not request.permissions.get("view_timers"):
         return abort(403)
 
-    timers = get_timers(table)
+    timers = get_timers(
+        table, include_secret=request.permissions.get("view_secret_timers")
+    )
 
     return render_template("index.html", timers=timers)
 

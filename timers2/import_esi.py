@@ -1,16 +1,15 @@
-import os
 import json
+import os
 import traceback
 from datetime import timezone
 
 import boto3
 import httpx
-from dateutil.parser import isoparse
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
+from dateutil.parser import isoparse
 
-from timers2.utils import get_timers, get_system_names, put_timer
-
+from timers2.utils import get_system_names, get_timers, put_timer
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(os.environ["TABLE_NAME"])
@@ -30,7 +29,7 @@ def handler(event, context):
 
     existing_campaigns = {
         esi_campaign_id
-        for timer in get_timers(table)
+        for timer in get_timers(table, only_active=False, include_secret=True)
         if (esi_campaign_id := timer.get("esi_campaign_id"))
     }
 
