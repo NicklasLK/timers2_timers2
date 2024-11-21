@@ -41,6 +41,7 @@ provider:
         - { "Fn::Join" : ["", ["https://", { "Ref" : "ApiGatewayRestApi" }, ".execute-api.${opt:region}.amazonaws.com/${opt:stage}" ] ] }
     OIDC_CLIENT_ID: ${ssm:/timers2/${opt:stage}/oidc-client-id}
     OIDC_CLIENT_SECRET: ${ssm:/timers2/${opt:stage}/oidc-client-secret}
+    NOTIFY_DISCORD_WEBHOOK: ${ssm:/timers2/${opt:stage}/notify-discord-webhook}
 
 functions:
   api:
@@ -62,6 +63,11 @@ functions:
     timeout: 900
     events:
       - schedule: rate(1 day)
+  notify-timers:
+    handler: timers2.notify_timers.handler
+    timeout: 900
+    events:
+      - schedule: rate(5 minutes)
 
 plugins:
   - serverless-wsgi
