@@ -21,6 +21,7 @@ STRUCTURE_TYPES = {
     "KEEPSTAR": "Keepstar",
     "ANSIBLEX": "Ansiblex",
     "ORBITAL_SKYHOOK": "Orbital Skyhook",
+    "STATION": "Station",
 }
 
 

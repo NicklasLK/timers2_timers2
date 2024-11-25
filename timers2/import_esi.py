@@ -15,8 +15,8 @@ dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(os.environ["TABLE_NAME"])
 
 EVENT_TYPE_MAP = {
-    "station_defense": "Station",
-    "ihub_defense": "I-hub",
+    "station_defense": "STATION",
+    "ihub_defense": "I_HUB",
     "tcu_defense": "TCU",
 }
 
