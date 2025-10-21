@@ -20,7 +20,6 @@ PERMISSION_ROLES = {
         "view_standings",
         "add_standing",
         "delete_standing",
-        "view_secret_timers",
     ],
     "urn:sso:diplomatic:alliance-diplomats": [
         "delete_timer",
@@ -31,10 +30,7 @@ PERMISSION_ROLES = {
     "urn:sso:military:fc:skirmish": ["delete_timer"],
     "urn:sso:military:military-coordinator": ["delete_timer"],
     "urn:sso:leadership:test-command": ["delete_timer"],
-    "urn:sso:logistics:alliance-logistics": [
-        "view_secret_timers",
-        "delete_timer",
-    ],
+    "urn:sso:logistics:alliance-logistics": ["delete_timer"],
 }
 
 

@@ -72,24 +72,57 @@
 {% block scripts %}
     <script>
         function startTimeParse() {
-            let startTimeText = $("#start_time").val();
-            let systemNameField = $("#system");
-            let notesField = $("#notes");
-            if (startTimeText.length == 0) {
+            const startTimeField = document.querySelector("#start_time");
+            const text = startTimeField?.value?.trim();
+            if (!text) {
                 return;
             }
 
-            if (startTimeText.includes("Reinforced until ")) {
-                let systemName = /(^.*?) - /.exec(startTimeText)[1];
-                if (systemNameField.val().length == 0) {
-                    systemNameField.val(systemName);
-                }
-
-                let structureName = /^.*? - (.*?)<br>/.exec(startTimeText)[1];
-                if (notesField.val().length == 0) {
-                    notesField.val(structureName);
-                }
+            // Example text:
+            // Orbital Skyhook (3T7-M I) [Sappo's Shuttle Gas] 1234 m Reinforced Until 2069.04.20 13:37:00
+            //
+            // Capture groups:
+            //   1 = structure type
+            //   2 = system name
+            //   3 = date string
+            const re = /^\s*(.*?)\s*\(\s*([^\s)]+)[^)]*\).*?Reinforced\s+Until\s+(.+)$/i;
+            const m = re.exec(text);
+            if (!m) {
+                return;
             }
+
+            const [, structureTypeRaw, systemName, dateStr] = m;
+            const structureType = structureTypeRaw.trim();
+
+            // Fill text fields if empty
+            const systemField = document.querySelector("#system");
+            const notesField = document.querySelector("#notes");
+            if (systemField && !systemField.value) {
+                systemField.value = systemName;
+            }
+            if (notesField && !notesField.value) {
+                notesField.value = structureType;
+            }
+
+            // Set structure_type select
+            const structureSelect = document.querySelector("#structure_type");
+            if (structureSelect) {
+                const lowerTarget = structureType.toLowerCase();
+                const options = Array.from(structureSelect.options);
+
+                // Find option whose display text matches (case-insensitive)
+                const match = options.find(
+                    (opt) => opt.text.trim().toLowerCase() === lowerTarget
+                );
+
+                // Select match or fallback
+                structureSelect.value = match?.value ?? "OTHER_UNKNOWN";
+
+                // Trigger a 'change' event
+                structureSelect.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+
+            return { structureType, systemName, dateStr };
         }
     </script>
 {% endblock %}

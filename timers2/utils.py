@@ -21,9 +21,9 @@ STRUCTURE_TYPES = {
     "KEEPSTAR": "Keepstar",
     "ANSIBLEX": "Ansiblex",
     "ORBITAL_SKYHOOK": "Orbital Skyhook",
+    "MERCENARY_DEN": "Mercenary Den",
     "STATION": "Station",
 }
-
 
 def get_system_region_name(table, system_name):
     response = table.query(
@@ -102,11 +102,7 @@ def put_timer(
     table.put_item(Item=item, ConditionExpression=Attr("PK").not_exists())
 
 
-def is_timer_secret(timer):
-    return timer["structure_type"] == "ORBITAL_SKYHOOK"
-
-
-def get_timers(table, *, only_active=True, include_secret=False):
+def get_timers(table, *, only_active=True):
     timers = []
 
     now = datetime.now(tz=timezone.utc)
@@ -126,9 +122,6 @@ def get_timers(table, *, only_active=True, include_secret=False):
 
             timer["start_time"] = isoparse(sk_parts[1])
             if only_active and timer["start_time"] < now - timedelta(hours=1):
-                continue
-
-            if not include_secret and is_timer_secret(timer):
                 continue
 
             timer["structure_type_name"] = STRUCTURE_TYPES[timer["structure_type"]]
