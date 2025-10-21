@@ -74,39 +74,43 @@
         function startTimeParse() {
             const startTimeField = document.querySelector("#start_time");
             const text = startTimeField?.value?.trim();
-            if (!text) {
+
+            // Fast guard
+            if (!text || !/reinforced\s+until/i.test(text)) {
                 return;
             }
 
-            // Example text:
-            // Orbital Skyhook (3T7-M I) [Sappo's Shuttle Gas] 1234 m Reinforced Until 2069.04.20 13:37:00
+            // Example texts:
+            // Orbital Skyhook (3T7-M I) [Sappo's Shuttle Gas] 1,234 m Reinforced Until 2069.04.20 13:37:00
+            // 3T7-M - Catboy Milking Farm 42,069 km Reinforced until 2069.04.20 13:37:00
             //
             // Capture groups:
-            //   1 = structure type
+            //   1 = structure type (if present)
             //   2 = system name
             //   3 = date string
-            const re = /^\s*(.*?)\s*\(\s*([^\s)]+)[^)]*\).*?Reinforced\s+Until\s+(.+)$/i;
+            const re = /^\s*(?:(?<structure>.*?)\s*\(\s*(?<system1>[^\s)]+)[^)]*\)|(?<system2>[A-Za-z0-9-]+))(?:\s*-\s*.*)?\s*.*?Reinforced\s+Until\s+(?<date>.+)$/i;
             const m = re.exec(text);
-            if (!m) {
+            if (!m || !m.groups) {
                 return;
             }
 
-            const [, structureTypeRaw, systemName, dateStr] = m;
-            const structureType = structureTypeRaw.trim();
+            const structureType = (m.groups.structure ?? "").trim();
+            const systemName = (m.groups.system1 ?? m.groups.system2 ?? "").trim();
+            const dateStr = m.groups.date.trim();
 
             // Fill text fields if empty
             const systemField = document.querySelector("#system");
             const notesField = document.querySelector("#notes");
-            if (systemField && !systemField.value) {
+            if (systemName && systemField && !systemField.value) {
                 systemField.value = systemName;
             }
-            if (notesField && !notesField.value) {
+            if (structureType && notesField && !notesField.value) {
                 notesField.value = structureType;
             }
 
             // Set structure_type select
             const structureSelect = document.querySelector("#structure_type");
-            if (structureSelect) {
+            if (structureType && structureSelect) {
                 const lowerTarget = structureType.toLowerCase();
                 const options = Array.from(structureSelect.options);
 
