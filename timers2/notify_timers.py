@@ -31,7 +31,7 @@ def send_message(content):
 
 
 def handler(event, context):
-    timers = get_timers(table, only_active=False, include_secret=True)
+    timers = get_timers(table, only_active=False)
 
     now = datetime.now(tz=timezone.utc)
     for timer in timers:

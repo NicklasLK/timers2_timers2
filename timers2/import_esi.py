@@ -29,7 +29,7 @@ def handler(event, context):
 
     existing_campaigns = {
         esi_campaign_id
-        for timer in get_timers(table, only_active=False, include_secret=True)
+        for timer in get_timers(table, only_active=False)
         if (esi_campaign_id := timer.get("esi_campaign_id"))
     }
 

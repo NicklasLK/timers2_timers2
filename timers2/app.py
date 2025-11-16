@@ -92,9 +92,7 @@ def index():
     if not request.permissions.get("view_timers"):
         return abort(403)
 
-    timers = get_timers(
-        table, include_secret=request.permissions.get("view_secret_timers")
-    )
+    timers = get_timers(table)
 
     return render_template("index.html", timers=timers)
 
