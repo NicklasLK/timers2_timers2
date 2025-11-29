@@ -22,6 +22,7 @@ STRUCTURE_TYPES = {
     "ANSIBLEX": "Ansiblex",
     "ORBITAL_SKYHOOK": "Orbital Skyhook",
     "MERCENARY_DEN": "Mercenary Den",
+    "METANOX": "Metanox",
     "STATION": "Station",
 }
 
