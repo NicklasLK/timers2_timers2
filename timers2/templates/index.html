@@ -26,13 +26,17 @@
                 <tr
                     class="align-middle
                     {% if timer.standing_type == "Friendly" %}
-                        table-success
+                        {% if timer.replace == "Logistics Replacement" %}
+                            table-info
+                        {% else %}
+                            table-success
+                        {% endif %}
                     {% elif timer.standing_type == "Hostile" %}
                         table-danger
                     {% elif timer.standing_type == "It's complicated" %}
                         table-warning
                     {% else %}
-                        table-info
+                        table-secondary
                     {% endif %}
                     ">
                     <td>
