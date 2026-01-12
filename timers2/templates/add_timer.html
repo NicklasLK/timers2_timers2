@@ -72,28 +72,14 @@
 {% block scripts %}
     <script>
         function startTimeParse() {
-            const selectOptionByText = (
-                selectEl,
-                targetText,
-                {
-                    fallbackValue = null,
-                    dispatch = true,
-                    mode = "exact" // "exact" | "contains" | "word"
-                } = {}
-                ) => {
+            const selectOptionByText = (selectEl, targetText, fallbackValue = null) => {
                 if (!selectEl || !targetText) return { matched: false, option: null };
 
                 const needle = String(targetText).trim().toLowerCase();
                 const options = Array.from(selectEl.options);
 
-                const matcher = {
-                    exact:    (t) => t === needle,
-                    contains:(t) => t.includes(needle),
-                    word:    (t) => t.split(/\W+/).includes(needle),
-                }[mode];
-
-                const match = options.find(opt =>
-                    matcher(opt.text.trim().toLowerCase())
+                const match = options.find(
+                    (opt) => opt.text.trim().toLowerCase().includes(needle)
                 );
 
                 if (match) {
@@ -102,17 +88,16 @@
                     selectEl.value = fallbackValue;
                 }
 
-                
                 selectEl.dispatchEvent(new Event("change", { bubbles: true }));
 
-                return { matched: !!match, option: match };
+                return { matched: !!match, option: match ?? null };
             };
 
             const startTimeField = document.querySelector("#start_time");
             const text = startTimeField?.value?.trim();
 
             // Fast guard
-            if (!text || !/reinforced\s+until/i.test(text)) {
+            if (!text || !/(?:reinforced|anchoring)\s+until/i.test(text)) {
                 return;
             }
 
@@ -124,7 +109,7 @@
             //   1 = structure type (if present)
             //   2 = system name
             //   3 = date string
-            const re = /^\s*(?:(?<structure>.*?)\s*\(\s*(?<system1>[^\s)]+)[^)]*\)|(?:(?<system2>[A-Za-z0-9-]+)\s*-\s*)?(?<structure2>.*?)(?=\s+\d[\d,]*\s*(?:km|m)\b|\s+Sec\.\s*[\d.]+|\s+(?:Reinforced|Anchoring)\s+until\b))(?:\s*-\s*.*)?\s*.*?(?<event>Reinforced|Anchoring)\s+until\s+(?<date>.+)\s*$/i;
+            const re = /^\s*(?:(?<structure1>.*?)\s*\(\s*(?<system1>[^\s)]+)[^)]*\)|(?:(?<system2>[A-Za-z0-9-]+)\s*-\s*)?(?<structure2>.*?)(?=\s+\d[\d,]*\s*(?:km|m)\b|\s+Sec\.\s*[\d.]+|\s+(?:Reinforced|Anchoring)\s+until\b))(?:\s*-\s*.*)?\s*.*?(?<event>Reinforced|Anchoring)\s+until\s+(?<date>.+)\s*$/i;
             const m = re.exec(text);
             if (!m || !m.groups) {
                 return;
@@ -148,20 +133,15 @@
             }
 
             // Set timer_type select (anchoring)
-            const timerTypeSelect = document.querySelector("timer_type");
+            const timerTypeSelect = document.querySelector("#timer_type");
             if (eventType && eventType.toLowerCase() === "anchoring" && timerTypeSelect) {
-                selectOptionByText(timerTypeSelect, "anchoring", {
-                    mode: "contains",
-                });
+                selectOptionByText(timerTypeSelect, "anchoring");
             }
 
             // Set structure_type select
-            const structureSelect = document.querySelector("structure_type");
+            const structureSelect = document.querySelector("#structure_type");
             if (structureType && structureSelect) {
-                selectOptionByText(structureSelect, structureType, {
-                    fallbackValue: "OTHER_UNKNOWN",
-                    mode: "contains",
-                });
+                selectOptionByText(structureSelect, structureType, "OTHER_UNKNOWN");
             }
 
             return { structureType, systemName, dateStr };
