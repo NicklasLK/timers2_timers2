@@ -12,35 +12,48 @@ dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(os.environ["TABLE_NAME"])
 
 
+UNTIL_RE = re.compile(
+    r"(Reinforced|Anchoring)\s+until\s+(\d{4}\.\d{2}\.\d{2}\s+\d{2}:\d{2}:\d{2})",
+    re.IGNORECASE,
+)
+
 class DatetimeField(StringField):
     def process_formdata(self, valuelist):
         super().process_formdata(valuelist)
 
-        if "Reinforced until " in self.data:
-            time_start_index = self.data.index("Reinforced until ") + 17
-            datestr = self.data[time_start_index : time_start_index + 19]
-            self.data = datetime.strptime(datestr, "%Y.%m.%d %H:%M:%S")
-            return
+        if isinstance(self.data, str) and self.data:
+            m = UNTIL_RE.search(self.data)
+            if m:
+                datestr = m.group(2)
+                try:
+                    self.data = datetime.strptime(datestr, "%Y.%m.%d %H:%M:%S")
+                except ValueError:
+                    # If somehow malformed, fall through to duration parsing
+                    pass
+                else:
+                    return
 
+        # Relative duration parsing: "10d 3h 2m", etc.
         timer_matches = list(
-            re.finditer(r"(?P<time_amt>[0-9]+)[ ]*(?P<dhms>[dhms]{1})", self.data)
+            re.finditer(r"(?P<time_amt>[0-9]+)\s*(?P<dhms>[dhms])", self.data or "")
         )
 
         if not timer_matches:
             self.data = None
+            return
 
         timer_time = datetime.now(tz=timezone.utc)
         for this_match in timer_matches:
             dhms = this_match.group("dhms")
             delta_amt = int(this_match.group("time_amt"))
             if dhms == "d":
-                timer_time = timer_time + timedelta(days=delta_amt)
+                timer_time += timedelta(days=delta_amt)
             elif dhms == "h":
-                timer_time = timer_time + timedelta(hours=delta_amt)
+                timer_time += timedelta(hours=delta_amt)
             elif dhms == "m":
-                timer_time = timer_time + timedelta(minutes=delta_amt)
+                timer_time += timedelta(minutes=delta_amt)
             elif dhms == "s":
-                timer_time = timer_time + timedelta(seconds=delta_amt)
+                timer_time += timedelta(seconds=delta_amt)
 
         self.data = timer_time
 
