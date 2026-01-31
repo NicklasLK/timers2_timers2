@@ -165,11 +165,13 @@
                              aria-current="page"
                              href="{{ url_for("add_timer") }}">Add timer</a>
                       </li>
-                      <li class="nav-item">
-                          <a class="nav-link"
-                             aria-current="page"
-                             href="{{ url_for("standings") }}">Standings</a>
-                      </li>
+                      {% if request.permissions.view_standings %}
+                          <li class="nav-item">
+                              <a class="nav-link"
+                                 aria-current="page"
+                                 href="{{ url_for("standings") }}">Standings</a>
+                          </li>
+                      {% endif %}
                   </ul>
                   <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">
                       <span id="themeIcon">🌙</span>
