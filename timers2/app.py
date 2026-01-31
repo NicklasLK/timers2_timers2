@@ -180,6 +180,11 @@ def delete_standing(id):
     return redirect(url_for("standings"))
 
 
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template("403.html"), 403
+
+
 @app.errorhandler(404)
 def resource_not_found(e):
     return render_template("404.html")
